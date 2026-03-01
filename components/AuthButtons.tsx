@@ -11,11 +11,11 @@ export default function AuthButtons({ isAuthenticated }: AuthButtonsProps) {
   if (!isAuthenticated) {
     return (
       <div className="flex items-center gap-3">
-        <Link className="rounded border border-black/20 px-3 py-1 text-sm" href="/register">
+        <Link className="rounded border border-black/20 bg-[var(--surface)] px-3 py-1 text-sm text-[var(--foreground)]" href="/register">
           Register
         </Link>
         <button
-          className="rounded bg-black px-3 py-1 text-sm text-white"
+          className="rounded border border-black/20 bg-[var(--surface)] px-3 py-1 text-sm text-[var(--foreground)]"
           onClick={() => signIn()}
           type="button"
         >
@@ -26,7 +26,7 @@ export default function AuthButtons({ isAuthenticated }: AuthButtonsProps) {
   }
 
   return (
-    <button className="rounded bg-black px-3 py-1 text-sm text-white" onClick={() => signOut()} type="button">
+    <button className="rounded border border-black/20 bg-[var(--surface)] px-3 py-1 text-sm text-[var(--foreground)]" onClick={() => signOut()} type="button">
       Logout
     </button>
   );

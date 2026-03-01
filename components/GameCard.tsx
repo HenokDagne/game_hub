@@ -5,9 +5,10 @@ import type { Game } from "@/types/game";
 
 type GameCardProps = {
   game: Game;
+  initialFavorite?: boolean;
 };
 
-export default function GameCard({ game }: GameCardProps) {
+export default function GameCard({ game, initialFavorite = false }: GameCardProps) {
   return (
     <article className="overflow-hidden rounded border border-black/10">
       <Link href={`/games/${game.id}`}>
@@ -23,7 +24,7 @@ export default function GameCard({ game }: GameCardProps) {
         </Link>
         <p className="text-sm text-black/70">{game.genre ?? "Unknown genre"} · {game.platform ?? "Unknown platform"}</p>
         {game.short_description ? <p className="text-sm text-black/70">{game.short_description}</p> : null}
-        <FavoriteButton gameId={String(game.id)} image={game.background_image} title={game.name} />
+        <FavoriteButton gameId={String(game.id)} image={game.background_image} initialFavorite={initialFavorite} title={game.name} />
       </div>
     </article>
   );

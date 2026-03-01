@@ -9,7 +9,7 @@ export default function Home() {
       </p>
 
       <div className="flex flex-wrap items-center justify-center gap-3">
-        <Link className="rounded bg-black px-5 py-2 text-white" href="/games">
+        <Link className="rounded border border-black/20 bg-[var(--surface)] px-5 py-2 text-[var(--foreground)]" href="/games">
           Browse Games
         </Link>
         <Link className="rounded border border-black/20 px-5 py-2" href="/favorites">

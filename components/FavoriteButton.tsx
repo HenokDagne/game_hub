@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 
 type FavoriteButtonProps = {
   gameId: string;
@@ -10,6 +11,7 @@ type FavoriteButtonProps = {
 };
 
 export default function FavoriteButton({ gameId, title, image, initialFavorite = false }: FavoriteButtonProps) {
+  const router = useRouter();
   const [isFavorite, setIsFavorite] = useState(initialFavorite);
   const [isPending, startTransition] = useTransition();
 
@@ -24,6 +26,7 @@ export default function FavoriteButton({ gameId, title, image, initialFavorite =
 
         if (response.ok) {
           setIsFavorite(true);
+          router.refresh();
         }
 
         return;
@@ -35,6 +38,7 @@ export default function FavoriteButton({ gameId, title, image, initialFavorite =
 
       if (response.ok) {
         setIsFavorite(false);
+        router.refresh();
       }
     });
   };

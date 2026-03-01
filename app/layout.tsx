@@ -30,13 +30,15 @@ export default async function RootLayout({
   const role = session?.user?.role === "ADMIN" ? "ADMIN" : session?.user ? "USER" : null;
 
   return (
-    <html lang="en">
+    <html data-theme="light" lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} h-screen overflow-hidden antialiased`}
       >
         <Providers>
-          <Navbar />
-          <AppShell role={role}>{children}</AppShell>
+          <div className="flex h-screen flex-col overflow-hidden">
+            <Navbar />
+            <AppShell role={role}>{children}</AppShell>
+          </div>
         </Providers>
       </body>
     </html>

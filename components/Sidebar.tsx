@@ -26,7 +26,7 @@ export default function Sidebar({ role }: SidebarProps) {
   const items = role === "ADMIN" ? adminItems : userItems;
 
   return (
-    <aside className="hidden h-[calc(100vh-73px)] w-72 shrink-0 overflow-y-auto border-r border-black/10 p-4 md:block">
+    <aside className="hidden h-full w-72 shrink-0 overflow-hidden border-r border-black/10 p-4 md:block">
       <p className="mb-3 text-xs font-semibold tracking-wide text-black/60">{role} MENU</p>
       <nav className="flex flex-col gap-2">
         {items.map((item) => (
