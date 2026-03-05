@@ -59,11 +59,11 @@ export default function LoginPage() {
           value={password}
         />
         {error ? <p className="text-sm text-red-600">{error}</p> : null}
-        <button className="w-full rounded bg-black px-4 py-2 text-white" disabled={loading} type="submit">
+        <button className="auth-button-shadow auth-submit-button w-full rounded px-4 py-2" disabled={loading} type="submit">
           {loading ? "Signing in..." : "Sign in"}
         </button>
       </form>
-      <button className="rounded border border-black/20 px-4 py-2" onClick={() => signIn("google", { callbackUrl })} type="button">
+      <button className="auth-button-shadow rounded border border-black/20 px-4 py-2" onClick={() => signIn("google", { callbackUrl })} type="button">
         Sign in with Google
       </button>
       <p className="text-sm">

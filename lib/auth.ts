@@ -42,10 +42,15 @@ export const authOptions: NextAuthOptions = {
           return null;
         }
 
+        if (user.role.startsWith("SUSPENDED_")) {
+          return null;
+        }
+
         return {
           id: user.id,
           email: user.email,
           name: user.name,
+          image: user.profileImage,
           role: user.role,
         };
       },
@@ -64,6 +69,7 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         token.id = user.id;
         token.role = (user as { role?: string }).role ?? "USER";
+        token.image = user.image ?? null;
       }
 
       return token;
@@ -72,6 +78,7 @@ export const authOptions: NextAuthOptions = {
       if (session.user) {
         session.user.id = token.id as string;
         session.user.role = (token.role as string) ?? "USER";
+        session.user.image = (token.image as string | null | undefined) ?? null;
       }
 
       return session;

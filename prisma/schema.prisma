@@ -20,9 +20,96 @@ model User {
   name      String?
   email     String   @unique
   password  String
+  profileImage String @default("/profile.png") @map("profile_image")
   role      String   @default("USER")
   createdAt DateTime @default(now())
+  profile   Profile?
+  steamProfile SteamProfile?
   favorites Favorite[]
+}
+
+model Profile {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bio       String?
+  location  String?
+  website   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model SteamProfile {
+  id               String             @id @default(cuid())
+  userId           String             @unique
+  user             User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  steamId          String             @unique @map("steam_id")
+  personaName      String             @map("persona_name")
+  profileUrl       String             @map("profile_url")
+  avatarUrl        String?            @map("avatar_url")
+  country          String?
+  onlineStatus     String             @default("OFFLINE") @map("online_status")
+  totalHoursPlayed Float              @default(0) @map("total_hours_played")
+  totalBadges      Int                @default(0) @map("total_badges")
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  friends          SteamFriend[]
+  gameStats        SteamGameStat[]
+  badges           SteamBadge[]
+  achievements     SteamAchievement[]
+}
+
+model SteamFriend {
+  id               String       @id @default(cuid())
+  steamProfileId   String       @map("steam_profile_id")
+  steamProfile     SteamProfile @relation(fields: [steamProfileId], references: [id], onDelete: Cascade)
+  friendSteamId    String       @map("friend_steam_id")
+  friendPersonaName String?     @map("friend_persona_name")
+  friendProfileUrl String?      @map("friend_profile_url")
+  friendAvatarUrl  String?      @map("friend_avatar_url")
+  createdAt        DateTime     @default(now())
+
+  @@unique([steamProfileId, friendSteamId])
+}
+
+model SteamGameStat {
+  id             String       @id @default(cuid())
+  steamProfileId String       @map("steam_profile_id")
+  steamProfile   SteamProfile @relation(fields: [steamProfileId], references: [id], onDelete: Cascade)
+  appId          Int          @map("app_id")
+  gameName       String       @map("game_name")
+  hoursPlayed    Float        @default(0) @map("hours_played")
+  lastPlayedAt   DateTime?    @map("last_played_at")
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@unique([steamProfileId, appId])
+}
+
+model SteamBadge {
+  id             String       @id @default(cuid())
+  steamProfileId String       @map("steam_profile_id")
+  steamProfile   SteamProfile @relation(fields: [steamProfileId], references: [id], onDelete: Cascade)
+  badgeCode      String       @map("badge_code")
+  badgeName      String       @map("badge_name")
+  level          Int          @default(1)
+  earnedAt       DateTime?    @map("earned_at")
+  createdAt      DateTime     @default(now())
+
+  @@unique([steamProfileId, badgeCode])
+}
+
+model SteamAchievement {
+  id              String       @id @default(cuid())
+  steamProfileId  String       @map("steam_profile_id")
+  steamProfile    SteamProfile @relation(fields: [steamProfileId], references: [id], onDelete: Cascade)
+  appId           Int          @map("app_id")
+  achievementCode String       @map("achievement_code")
+  achievementName String       @map("achievement_name")
+  unlockedAt      DateTime?    @map("unlocked_at")
+  createdAt       DateTime     @default(now())
+
+  @@unique([steamProfileId, appId, achievementCode])
 }
 
 model Favorite {

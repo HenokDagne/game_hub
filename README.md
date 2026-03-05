@@ -37,6 +37,25 @@ npm run prisma:seed
 npm run dev
 ```
 
+## Admin Provisioning (Safe)
+
+Do not expose admin signup in the UI. Provision admin users server-side only.
+
+One-time create/promote admin via seed:
+
+```bash
+ADMIN_NAME="biruk" \
+ADMIN_EMAIL="biruk19@gmail.com" \
+ADMIN_PASSWORD="pass3685" \
+npm run prisma:seed
+```
+
+This seed command will:
+
+- Create the admin user if it does not exist
+- Promote the user to role `ADMIN` if the email already exists
+- Reset that user's password to `ADMIN_PASSWORD`
+
 ## Test and Build
 
 ```bash

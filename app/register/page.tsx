@@ -9,6 +9,7 @@ export default function RegisterPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [profileImage, setProfileImage] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -17,16 +18,18 @@ export default function RegisterPage() {
     setLoading(true);
     setError(null);
 
+    const payload = new FormData();
+    payload.append("name", name.trim());
+    payload.append("email", email.trim());
+    payload.append("password", password);
+
+    if (profileImage) {
+      payload.append("profileImage", profileImage);
+    }
+
     const response = await fetch("/api/register", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        name: name.trim() || undefined,
-        email: email.trim(),
-        password,
-      }),
+      body: payload,
     });
 
     setLoading(false);
@@ -68,8 +71,14 @@ export default function RegisterPage() {
           type="password"
           value={password}
         />
+        <input
+          accept="image/*"
+          className="w-full rounded border border-black/20 px-3 py-2"
+          onChange={(event) => setProfileImage(event.target.files?.[0] ?? null)}
+          type="file"
+        />
         {error ? <p className="text-sm text-red-600">{error}</p> : null}
-        <button className="w-full rounded bg-black px-4 py-2 text-white" disabled={loading} type="submit">
+        <button className="auth-button-shadow auth-submit-button w-full rounded px-4 py-2" disabled={loading} type="submit">
           {loading ? "Creating..." : "Create account"}
         </button>
       </form>

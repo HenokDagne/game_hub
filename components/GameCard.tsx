@@ -10,7 +10,7 @@ type GameCardProps = {
 
 export default function GameCard({ game, initialFavorite = false }: GameCardProps) {
   return (
-    <article className="overflow-hidden rounded border border-black/10">
+    <article className="card-hover-blur game-card-shadow overflow-hidden rounded border border-black/10">
       <Link href={`/games/${game.id}`}>
         <div className="relative h-44 w-full bg-black/5">
           {game.background_image ? (
