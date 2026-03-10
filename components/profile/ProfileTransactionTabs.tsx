@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import type { TransactionItem } from "@/app/dashboard/dummy";
+import type { TransactionItem } from "@/components/profile/types";
 import {
   CoinflipPage,
   JackpotPage,

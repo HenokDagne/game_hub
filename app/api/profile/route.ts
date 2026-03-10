@@ -6,6 +6,7 @@ import {
   getProfilePayload,
   hasExtendedProfileModels,
   isMissingTableError,
+  ProfileInputError,
   updateProfilePayload,
   withDefaultExtendedPayload,
 } from "./profile-service";
@@ -51,16 +52,7 @@ export async function PUT(request: Request) {
     const body = await request.json();
     const parsed = updateSchema.parse(body);
 
-    const hasSteamPayload = Boolean(parsed.steamProfile);
-
     const hasExtendedModels = hasExtendedProfileModels();
-
-    if (!hasSteamPayload && (parsed.friends || parsed.gameStats || parsed.badges || parsed.achievements)) {
-      return NextResponse.json(
-        { error: "Steam profile details are required before saving friends, stats, badges, or achievements" },
-        { status: 400 },
-      );
-    }
 
     if (!hasExtendedModels && (parsed.profile || parsed.steamProfile || parsed.friends || parsed.gameStats || parsed.badges || parsed.achievements)) {
       return NextResponse.json(
@@ -75,6 +67,10 @@ export async function PUT(request: Request) {
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: error.issues[0]?.message ?? "Invalid request" }, { status: 400 });
+    }
+
+    if (error instanceof ProfileInputError) {
+      return NextResponse.json({ error: error.message }, { status: 400 });
     }
 
     if (isMissingTableError(error)) {

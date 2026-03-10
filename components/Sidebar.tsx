@@ -10,16 +10,25 @@ type SidebarItem = {
 };
 
 const userItems: SidebarItem[] = [
+  { href: "/", label: "Home" },
   { href: "/games", label: "Games" },
   { href: "/favorites", label: "Favorites" },
   { href: "/dashboard", label: "Dashboard" },
+  { href: "/dashboard/library", label: "Library" },
+  { href: "/dashboard/wishlist", label: "Wishlist" },
+  { href: "/dashboard/notifications", label: "Notifications" },
+  { href: "/dashboard/profile", label: "Profile Settings" },
 ];
 
 const adminItems: SidebarItem[] = [
-  { href: "/games", label: "Games" },
-  { href: "/favorites", label: "Favorites" },
-  { href: "/dashboard", label: "Dashboard" },
   { href: "/admin", label: "Admin" },
+  { href: "/admin/analytics", label: "Analytics" },
+  { href: "/admin/users", label: "User Management" },
+  { href: "/admin/content", label: "Content Management" },
+  { href: "/admin/orders", label: "Orders and Payments" },
+  { href: "/admin/moderation", label: "Moderation" },
+  { href: "/dashboard/security", label: "System Settings" },
+  { href: "/dashboard", label: "Back to User Dashboard" },
 ];
 
 export default function Sidebar({ role }: SidebarProps) {

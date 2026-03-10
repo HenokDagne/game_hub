@@ -52,9 +52,13 @@ export default async function GameDetailSidebar({ genre, currentGameId }: GameDe
       {relatedGames.length ? (
         <div className="hide-scrollbar max-h-[calc(100vh-14rem)] space-y-3 overflow-y-auto pr-1">
           {relatedGames.map((relatedGame) => (
-            <Link className="block rounded border border-black/10 p-2 hover:bg-black/5" href={`/games/${relatedGame.id}`} key={relatedGame.id}>
+            <Link
+              className="group card-hover-blur block rounded border border-black/10 bg-white/70 p-2 transition-colors duration-200 hover:border-lime-400/60 hover:bg-lime-50/70"
+              href={`/games/${relatedGame.id}`}
+              key={relatedGame.id}
+            >
               <div className="flex items-center gap-3">
-                <div className="relative h-14 w-20 shrink-0 overflow-hidden rounded bg-black/5">
+                <div className="relative h-14 w-20 shrink-0 overflow-hidden rounded bg-black/5 ring-2 ring-transparent transition-colors duration-200 group-hover:ring-lime-400">
                   {relatedGame.background_image ? (
                     <Image alt={relatedGame.name} className="object-cover" fill sizes="80px" src={relatedGame.background_image} />
                   ) : null}

@@ -3,25 +3,36 @@
 import { FormEvent, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Eye, EyeClosed } from "lucide-react";
 
 export default function RegisterPage() {
   const router = useRouter();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [profileImage, setProfileImage] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setLoading(true);
     setError(null);
+
+    if (password !== confirmPassword) {
+      setError("Passwords do not match");
+      return;
+    }
+
+    setLoading(true);
 
     const payload = new FormData();
     payload.append("name", name.trim());
     payload.append("email", email.trim());
     payload.append("password", password);
+    payload.append("confirmPassword", confirmPassword);
 
     if (profileImage) {
       payload.append("profileImage", profileImage);
@@ -62,15 +73,44 @@ export default function RegisterPage() {
           type="email"
           value={email}
         />
-        <input
-          className="w-full rounded border border-black/20 px-3 py-2"
-          minLength={6}
-          onChange={(event) => setPassword(event.target.value)}
-          placeholder="Password"
-          required
-          type="password"
-          value={password}
-        />
+        <div className="flex gap-2">
+          <input
+            className="w-full rounded border border-black/20 px-3 py-2"
+            minLength={6}
+            onChange={(event) => setPassword(event.target.value)}
+            placeholder="Password"
+            required
+            type={showPassword ? "text" : "password"}
+            value={password}
+          />
+          <button
+            className="rounded border border-black/20 px-3 py-2 text-sm"
+            onClick={() => setShowPassword((prev) => !prev)}
+            aria-label={showPassword ? "Hide password" : "Show password"}
+            type="button"
+          >
+            {showPassword ? <Eye className="h-4 w-4" /> : <EyeClosed className="h-4 w-4" />}
+          </button>
+        </div>
+        <div className="flex gap-2">
+          <input
+            className="w-full rounded border border-black/20 px-3 py-2"
+            minLength={6}
+            onChange={(event) => setConfirmPassword(event.target.value)}
+            placeholder="Confirm password"
+            required
+            type={showConfirmPassword ? "text" : "password"}
+            value={confirmPassword}
+          />
+          <button
+            className="rounded border border-black/20 px-3 py-2 text-sm"
+            onClick={() => setShowConfirmPassword((prev) => !prev)}
+            aria-label={showConfirmPassword ? "Hide confirm password" : "Show confirm password"}
+            type="button"
+          >
+            {showConfirmPassword ? <Eye className="h-4 w-4" /> : <EyeClosed className="h-4 w-4" />}
+          </button>
+        </div>
         <input
           accept="image/*"
           className="w-full rounded border border-black/20 px-3 py-2"

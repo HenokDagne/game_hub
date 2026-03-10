@@ -1,14 +1,16 @@
 import bcrypt from "bcrypt";
 import type { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import GoogleProvider from "next-auth/providers/google";
 import { z } from "zod";
+import { getGoogleAuthProvider } from "@/lib/auth/google-provider";
 import { prisma } from "@/lib/prisma";
 
 const loginSchema = z.object({
   email: z.string().email(),
   password: z.string().min(6),
 });
+
+const googleProvider = getGoogleAuthProvider();
 
 export const authOptions: NextAuthOptions = {
   session: {
@@ -55,14 +57,7 @@ export const authOptions: NextAuthOptions = {
         };
       },
     }),
-    ...(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET
-      ? [
-          GoogleProvider({
-            clientId: process.env.GOOGLE_CLIENT_ID,
-            clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-          }),
-        ]
-      : []),
+    ...(googleProvider ? [googleProvider] : []),
   ],
   callbacks: {
     jwt: async ({ token, user }) => {

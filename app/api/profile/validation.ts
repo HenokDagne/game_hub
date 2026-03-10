@@ -1,5 +1,14 @@
 import { z } from "zod";
 
+function isAbsoluteUrl(value: string) {
+  try {
+    new URL(value);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 const optionalText = z
   .string()
   .trim()
@@ -14,6 +23,15 @@ const optionalUrl = z
   .optional()
   .transform((value) => (value && value.length ? value : null));
 
+const optionalUrlOrLocalPath = z
+  .string()
+  .trim()
+  .optional()
+  .refine((value) => !value || value.startsWith("/") || isAbsoluteUrl(value), {
+    message: "Invalid URL",
+  })
+  .transform((value) => (value && value.length ? value : null));
+
 const profileSchema = z.object({
   bio: z
     .string()
@@ -26,14 +44,14 @@ const profileSchema = z.object({
 });
 
 const steamProfileSchema = z.object({
-  steamId: z.string().trim().min(3).max(50),
-  personaName: z.string().trim().min(2).max(80),
-  profileUrl: z.string().trim().url(),
-  avatarUrl: optionalUrl,
+  steamId: z.string().trim().min(3).max(50).optional(),
+  personaName: z.string().trim().min(2).max(80).optional(),
+  profileUrl: z.string().trim().url().optional(),
+  avatarUrl: optionalUrlOrLocalPath,
   country: optionalText,
-  onlineStatus: z.enum(["ONLINE", "OFFLINE", "AWAY", "BUSY", "SNOOZE"]),
-  totalHoursPlayed: z.coerce.number().min(0).max(200000),
-  totalBadges: z.coerce.number().int().min(0).max(100000),
+  onlineStatus: z.enum(["ONLINE", "OFFLINE", "AWAY", "BUSY", "SNOOZE"]).optional(),
+  totalHoursPlayed: z.coerce.number().min(0).max(200000).optional(),
+  totalBadges: z.coerce.number().int().min(0).max(100000).optional(),
 });
 
 const friendSchema = z.object({
@@ -44,8 +62,8 @@ const friendSchema = z.object({
     .max(80)
     .optional()
     .transform((value) => (value && value.length ? value : null)),
-  friendProfileUrl: optionalUrl,
-  friendAvatarUrl: optionalUrl,
+  friendProfileUrl: optionalUrlOrLocalPath,
+  friendAvatarUrl: optionalUrlOrLocalPath,
 });
 
 const gameStatSchema = z.object({
@@ -88,7 +106,7 @@ export const updateSchema = z.object({
     .max(50)
     .optional()
     .transform((value) => (value && value.length ? value : null)),
-  profileImage: optionalUrl,
+  profileImage: optionalUrlOrLocalPath,
   profile: profileSchema.optional(),
   steamProfile: steamProfileSchema.optional(),
   friends: z.array(friendSchema).max(100).optional(),

@@ -4,6 +4,7 @@ import { FormEvent, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
+import { Eye, EyeClosed } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -11,6 +12,7 @@ export default function LoginPage() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -49,15 +51,25 @@ export default function LoginPage() {
           type="email"
           value={email}
         />
-        <input
-          className="w-full rounded border border-black/20 px-3 py-2"
-          minLength={6}
-          onChange={(event) => setPassword(event.target.value)}
-          placeholder="Password"
-          required
-          type="password"
-          value={password}
-        />
+        <div className="flex gap-2">
+          <input
+            className="w-full rounded border border-black/20 px-3 py-2"
+            minLength={6}
+            onChange={(event) => setPassword(event.target.value)}
+            placeholder="Password"
+            required
+            type={showPassword ? "text" : "password"}
+            value={password}
+          />
+          <button
+            aria-label={showPassword ? "Hide password" : "Show password"}
+            className="rounded border border-black/20 px-3 py-2 text-sm"
+            onClick={() => setShowPassword((prev) => !prev)}
+            type="button"
+          >
+            {showPassword ? <Eye className="h-4 w-4" /> : <EyeClosed className="h-4 w-4" />}
+          </button>
+        </div>
         {error ? <p className="text-sm text-red-600">{error}</p> : null}
         <button className="auth-button-shadow auth-submit-button w-full rounded px-4 py-2" disabled={loading} type="submit">
           {loading ? "Signing in..." : "Sign in"}

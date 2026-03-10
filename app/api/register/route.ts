@@ -1,29 +1,27 @@
 import bcrypt from "bcrypt";
-import { randomUUID } from "crypto";
-import { mkdir, writeFile } from "fs/promises";
-import { join } from "path";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
+import { ProfileImageValidationError, saveProfileImage } from "@/lib/profile-image-upload";
 
-const DEFAULT_PROFILE_IMAGE = "/profile.png";
-const MAX_PROFILE_IMAGE_SIZE = 5 * 1024 * 1024;
-const ALLOWED_IMAGE_MIME_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/gif"]);
-
-class BadRequestError extends Error {}
-
-const registerSchema = z.object({
-  name: z
-    .string()
-    .trim()
-    .transform((value) => (value.length ? value : undefined))
-    .optional()
-    .refine((value) => value === undefined || (value.length >= 2 && value.length <= 50), {
-      message: "Name must be between 2 and 50 characters",
-    }),
-  email: z.string().trim().email(),
-  password: z.string().min(6),
-});
+const registerSchema = z
+  .object({
+    name: z
+      .string()
+      .trim()
+      .transform((value) => (value.length ? value : undefined))
+      .optional()
+      .refine((value) => value === undefined || (value.length >= 2 && value.length <= 50), {
+        message: "Name must be between 2 and 50 characters",
+      }),
+    email: z.string().trim().email(),
+    password: z.string().min(6),
+    confirmPassword: z.string().min(6),
+  })
+  .refine((value) => value.password === value.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+  });
 
 async function getRegisterPayload(request: Request) {
   const contentType = request.headers.get("content-type") ?? "";
@@ -33,12 +31,14 @@ async function getRegisterPayload(request: Request) {
     const name = formData.get("name");
     const email = formData.get("email");
     const password = formData.get("password");
+    const confirmPassword = formData.get("confirmPassword");
     const profileImage = formData.get("profileImage");
 
     return {
       name: typeof name === "string" ? name : undefined,
       email: typeof email === "string" ? email : "",
       password: typeof password === "string" ? password : "",
+      confirmPassword: typeof confirmPassword === "string" ? confirmPassword : "",
       profileImage: profileImage instanceof File ? profileImage : null,
     };
   }
@@ -47,46 +47,16 @@ async function getRegisterPayload(request: Request) {
     name?: string;
     email?: string;
     password?: string;
+    confirmPassword?: string;
   };
 
   return {
     name: body.name,
     email: body.email ?? "",
     password: body.password ?? "",
+    confirmPassword: body.confirmPassword ?? "",
     profileImage: null,
   };
-}
-
-async function saveProfileImage(file: File | null) {
-  if (!file || file.size === 0) {
-    return DEFAULT_PROFILE_IMAGE;
-  }
-
-  if (!ALLOWED_IMAGE_MIME_TYPES.has(file.type)) {
-    throw new BadRequestError("Profile image must be JPEG, PNG, WEBP, or GIF");
-  }
-
-  if (file.size > MAX_PROFILE_IMAGE_SIZE) {
-    throw new BadRequestError("Profile image size must be 5MB or less");
-  }
-
-  const extensionMap: Record<string, string> = {
-    "image/jpeg": "jpg",
-    "image/png": "png",
-    "image/webp": "webp",
-    "image/gif": "gif",
-  };
-
-  const extension = extensionMap[file.type] ?? "png";
-  const fileName = `${randomUUID()}.${extension}`;
-  const uploadDirectory = join(process.cwd(), "public", "uploads", "profiles");
-  const outputPath = join(uploadDirectory, fileName);
-  const fileBuffer = Buffer.from(await file.arrayBuffer());
-
-  await mkdir(uploadDirectory, { recursive: true });
-  await writeFile(outputPath, fileBuffer);
-
-  return `/uploads/profiles/${fileName}`;
 }
 
 export async function POST(request: Request) {
@@ -96,6 +66,7 @@ export async function POST(request: Request) {
       name: payload.name,
       email: payload.email,
       password: payload.password,
+      confirmPassword: payload.confirmPassword,
     });
     const profileImage = await saveProfileImage(payload.profileImage);
 
@@ -134,7 +105,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: error.issues[0]?.message ?? "Invalid request" }, { status: 400 });
     }
 
-    if (error instanceof BadRequestError) {
+    if (error instanceof ProfileImageValidationError) {
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
 

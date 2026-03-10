@@ -1,5 +1,5 @@
 import ProfileTransactionsTable from "@/components/profile/ProfileTransactionsTable";
-import type { TransactionItem } from "@/app/dashboard/dummy";
+import type { TransactionItem } from "@/components/profile/types";
 
 type CoinflipPageProps = {
   items: TransactionItem[];

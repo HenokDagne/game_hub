@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { signIn, signOut } from "next-auth/react";
+import { signOut } from "next-auth/react";
 
 type AuthButtonsProps = {
   isAuthenticated: boolean;
@@ -16,7 +16,9 @@ export default function AuthButtons({ isAuthenticated }: AuthButtonsProps) {
         </Link>
         <button
           className="rounded border border-black/20 bg-[var(--surface)] px-3 py-1 text-sm text-[var(--foreground)]"
-          onClick={() => signIn()}
+          onClick={() => {
+            window.location.href = "/login";
+          }}
           type="button"
         >
           Login

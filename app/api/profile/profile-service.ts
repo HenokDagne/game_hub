@@ -16,6 +16,8 @@ const defaultExtendedPayload = {
   achievements: [],
 };
 
+export class ProfileInputError extends Error {}
+
 export function isMissingTableError(error: unknown) {
   return typeof error === "object" && error !== null && "code" in error && error.code === "P2021";
 }
@@ -124,35 +126,88 @@ export async function updateProfilePayload(userId: string, parsed: UpdateProfile
         })
       : await tx.profile.findUnique({ where: { userId } });
 
-    let steamProfile = await tx.steamProfile.findUnique({
-      where: { userId },
-    });
+    let steamProfile = await tx.steamProfile.findUnique({ where: { userId } });
 
-    if (parsed.steamProfile) {
-      steamProfile = await tx.steamProfile.upsert({
-        where: { userId },
-        create: {
-          userId,
-          steamId: parsed.steamProfile.steamId,
-          personaName: parsed.steamProfile.personaName,
-          profileUrl: parsed.steamProfile.profileUrl,
-          avatarUrl: parsed.steamProfile.avatarUrl,
-          country: parsed.steamProfile.country,
-          onlineStatus: parsed.steamProfile.onlineStatus,
-          totalHoursPlayed: parsed.steamProfile.totalHoursPlayed,
-          totalBadges: parsed.steamProfile.totalBadges,
-        },
-        update: {
-          steamId: parsed.steamProfile.steamId,
-          personaName: parsed.steamProfile.personaName,
-          profileUrl: parsed.steamProfile.profileUrl,
-          avatarUrl: parsed.steamProfile.avatarUrl,
-          country: parsed.steamProfile.country,
-          onlineStatus: parsed.steamProfile.onlineStatus,
-          totalHoursPlayed: parsed.steamProfile.totalHoursPlayed,
-          totalBadges: parsed.steamProfile.totalBadges,
-        },
-      });
+    if (parsed.steamProfile && Object.keys(parsed.steamProfile).length > 0) {
+      const steamUpdateData: Record<string, unknown> = {};
+
+      if (typeof parsed.steamProfile.steamId === "string") {
+        steamUpdateData.steamId = parsed.steamProfile.steamId;
+      }
+
+      if (typeof parsed.steamProfile.personaName === "string") {
+        steamUpdateData.personaName = parsed.steamProfile.personaName;
+      }
+
+      if (typeof parsed.steamProfile.profileUrl === "string") {
+        steamUpdateData.profileUrl = parsed.steamProfile.profileUrl;
+      }
+
+      if ("avatarUrl" in parsed.steamProfile) {
+        steamUpdateData.avatarUrl = parsed.steamProfile.avatarUrl;
+      }
+
+      if ("country" in parsed.steamProfile) {
+        steamUpdateData.country = parsed.steamProfile.country;
+      }
+
+      if (parsed.steamProfile.onlineStatus) {
+        steamUpdateData.onlineStatus = parsed.steamProfile.onlineStatus;
+      }
+
+      if (typeof parsed.steamProfile.totalHoursPlayed === "number") {
+        steamUpdateData.totalHoursPlayed = parsed.steamProfile.totalHoursPlayed;
+      }
+
+      if (typeof parsed.steamProfile.totalBadges === "number") {
+        steamUpdateData.totalBadges = parsed.steamProfile.totalBadges;
+      }
+
+      if (steamProfile) {
+        steamProfile = await tx.steamProfile.update({
+          where: { userId },
+          data: steamUpdateData,
+        });
+      } else {
+        const steamId = typeof parsed.steamProfile.steamId === "string" ? parsed.steamProfile.steamId : undefined;
+        const personaName =
+          typeof parsed.steamProfile.personaName === "string" ? parsed.steamProfile.personaName : undefined;
+        const profileUrl =
+          typeof parsed.steamProfile.profileUrl === "string" ? parsed.steamProfile.profileUrl : undefined;
+
+        if (!steamId || !personaName || !profileUrl) {
+          throw new ProfileInputError(
+            "Steam ID, Persona Name, and Profile URL are required to create a Steam profile",
+          );
+        }
+
+        steamProfile = await tx.steamProfile.create({
+          data: {
+            userId,
+            steamId,
+            personaName,
+            profileUrl,
+            avatarUrl:
+              "avatarUrl" in parsed.steamProfile ? (parsed.steamProfile.avatarUrl ?? undefined) : undefined,
+            country: "country" in parsed.steamProfile ? (parsed.steamProfile.country ?? undefined) : undefined,
+            onlineStatus: parsed.steamProfile.onlineStatus ?? "OFFLINE",
+            totalHoursPlayed: parsed.steamProfile.totalHoursPlayed ?? 0,
+            totalBadges: parsed.steamProfile.totalBadges ?? 0,
+          },
+        });
+      }
+    }
+
+    const hasNonEmptyCollectionData =
+      (parsed.friends?.length ?? 0) > 0 ||
+      (parsed.gameStats?.length ?? 0) > 0 ||
+      (parsed.badges?.length ?? 0) > 0 ||
+      (parsed.achievements?.length ?? 0) > 0;
+
+    if (!steamProfile && hasNonEmptyCollectionData) {
+      throw new ProfileInputError(
+        "Steam profile details are required before saving friends, stats, badges, or achievements",
+      );
     }
 
     if (steamProfile) {

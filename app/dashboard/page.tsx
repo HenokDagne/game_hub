@@ -3,8 +3,7 @@ import ProfileActivityFeed from "@/components/profile/ProfileActivityFeed";
 import ProfileAvatar from "@/components/profile/ProfileAvatar";
 import ProfileMetricCard from "@/components/profile/ProfileMetricCard";
 import ProfileTransactionTabs from "@/components/profile/ProfileTransactionTabs";
-import { buildDummyActivity, buildDummyTransactions } from "./dummy";
-import type { ActivityItem, TransactionItem } from "./dummy";
+import type { ActivityItem, TransactionItem } from "@/components/profile/types";
 import { prisma } from "@/lib/prisma";
 import { getSafeServerSession } from "@/lib/session";
 
@@ -85,9 +84,9 @@ export default async function DashboardPage() {
   }
 
   const displayName = user.name ?? steamProfile?.personaName ?? "Player";
-  const walletValue = steamProfile ? steamProfile.totalHoursPlayed * 2.5 + user.favorites.length * 4 : 2573.25;
-  const progressLevel = Math.max(Math.floor((steamProfile?.totalHoursPlayed ?? 140) / 50) + 1, 1);
-  const currentXp = Math.round((steamProfile?.totalHoursPlayed ?? 140) * 4);
+  const walletValue = (steamProfile?.totalHoursPlayed ?? 0) * 2.5 + user.favorites.length * 4;
+  const progressLevel = Math.max(Math.floor((steamProfile?.totalHoursPlayed ?? 0) / 50) + 1, 1);
+  const currentXp = Math.round((steamProfile?.totalHoursPlayed ?? 0) * 4);
   const nextLevelXp = progressLevel * 300;
   const progressPercent = Math.min(Math.round((currentXp / Math.max(nextLevelXp, 1)) * 100), 100);
 
@@ -128,7 +127,7 @@ export default async function DashboardPage() {
           receive: `$${Math.max(Math.round(stat.hoursPlayed * 5.3), 55).toLocaleString()}`,
           status: index % 4 === 0 ? "IN_PROGRESS" : index % 5 === 0 ? "FAILURE" : "SUCCESS",
         }))
-      : buildDummyTransactions();
+      : [];
 
   const activityFeed: ActivityItem[] =
     steamProfile?.friends.length
@@ -140,7 +139,7 @@ export default async function DashboardPage() {
           badge: `${Math.max(5, 100 - index * 7)} lvl`,
           imageUrl: friend.friendAvatarUrl,
         }))
-      : buildDummyActivity(displayName, user.profileImage);
+      : [];
 
   return (
     <section className="profile-shell w-full space-y-4 rounded-2xl p-4">
