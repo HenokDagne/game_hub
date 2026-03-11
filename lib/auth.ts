@@ -1,4 +1,5 @@
 import bcrypt from "bcrypt";
+import { randomBytes } from "crypto";
 import type { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { z } from "zod";
@@ -60,7 +61,71 @@ export const authOptions: NextAuthOptions = {
     ...(googleProvider ? [googleProvider] : []),
   ],
   callbacks: {
+    signIn: async ({ user, account }) => {
+      if (account?.provider !== "google") {
+        return true;
+      }
+
+      const email = user.email?.toLowerCase();
+
+      if (!email) {
+        return false;
+      }
+
+      const existingUser = await prisma.user.findUnique({
+        where: { email },
+      });
+
+      if (existingUser?.role.startsWith("SUSPENDED_")) {
+        return false;
+      }
+
+      if (!existingUser) {
+        const randomPassword = randomBytes(32).toString("hex");
+        const hashedPassword = await bcrypt.hash(randomPassword, 10);
+
+        await prisma.user.create({
+          data: {
+            email,
+            name: user.name,
+            profileImage: user.image ?? "/profile.png",
+            password: hashedPassword,
+            role: "USER",
+          },
+        });
+      } else {
+        await prisma.user.update({
+          where: { id: existingUser.id },
+          data: {
+            name: user.name ?? existingUser.name,
+            profileImage: user.image ?? existingUser.profileImage,
+          },
+        });
+      }
+
+      return true;
+    },
     jwt: async ({ token, user }) => {
+      const email = (user?.email ?? token.email)?.toLowerCase();
+
+      if (email) {
+        const dbUser = await prisma.user.findUnique({
+          where: { email },
+          select: {
+            id: true,
+            role: true,
+            profileImage: true,
+          },
+        });
+
+        if (dbUser) {
+          token.id = dbUser.id;
+          token.role = dbUser.role;
+          token.image = dbUser.profileImage;
+          return token;
+        }
+      }
+
       if (user) {
         token.id = user.id;
         token.role = (user as { role?: string }).role ?? "USER";

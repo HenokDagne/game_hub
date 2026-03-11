@@ -149,8 +149,13 @@ export default function RegisterPage() {
           type="file"
         />
         {error ? <p className="text-sm text-red-600">{error}</p> : null}
-        <button className="auth-button-shadow auth-submit-button w-full rounded px-4 py-2" disabled={loading} type="submit">
-          {loading ? "Creating..." : "Create account"}
+        <button
+          className="auth-button-shadow auth-submit-button flex w-full items-center justify-center gap-2 rounded px-4 py-2"
+          disabled={loading}
+          type="submit"
+        >
+          {loading ? <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" /> : null}
+          <span>{loading ? "Creating..." : "Create account"}</span>
         </button>
       </form>
       <p className="text-sm">
