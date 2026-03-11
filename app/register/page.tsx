@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Eye, EyeClosed } from "lucide-react";
@@ -14,8 +14,23 @@ export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [profileImage, setProfileImage] = useState<File | null>(null);
+  const [profilePreviewUrl, setProfilePreviewUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!profileImage) {
+      setProfilePreviewUrl(null);
+      return;
+    }
+
+    const objectUrl = URL.createObjectURL(profileImage);
+    setProfilePreviewUrl(objectUrl);
+
+    return () => {
+      URL.revokeObjectURL(objectUrl);
+    };
+  }, [profileImage]);
 
   const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -58,6 +73,22 @@ export default function RegisterPage() {
     <main className="mx-auto flex w-full max-w-md flex-col gap-4 px-6 py-10">
       <h1 className="text-3xl font-bold">Register</h1>
       <form className="space-y-3" onSubmit={onSubmit}>
+        <div className="flex justify-center">
+          <div className="rounded-full bg-gradient-to-tr from-[#f9ce34] via-[#ee2a7b] to-[#6228d7] p-[3px] shadow-sm">
+            {profilePreviewUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                alt="Selected profile preview"
+                className="h-20 w-20 rounded-full border-2 border-white object-cover"
+                src={profilePreviewUrl}
+              />
+            ) : (
+              <div className="flex h-20 w-20 items-center justify-center rounded-full border-2 border-white bg-black/5 text-sm font-semibold text-black/60">
+                Avatar
+              </div>
+            )}
+          </div>
+        </div>
         <input
           className="w-full rounded border border-black/20 px-3 py-2"
           onChange={(event) => setName(event.target.value)}
