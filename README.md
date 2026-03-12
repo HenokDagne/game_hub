@@ -1,5 +1,9 @@
 # GameHub
 
+![Next.js](https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=next.js&logoColor=white)
+![OAuth 2.0](https://img.shields.io/badge/OAuth_2.0-2F2F2F?style=for-the-badge&logo=oauth&logoColor=white)
+![Prisma](https://img.shields.io/badge/Prisma-2D3748?style=for-the-badge&logo=prisma&logoColor=white)
+
 GameHub is a full-stack game discovery platform built with Next.js App Router, Prisma, PostgreSQL, and NextAuth. It lets users browse games, manage favorites, access a personalized dashboard, and use role-based admin tools for analytics, moderation, and user management.
 
 ## Overview
