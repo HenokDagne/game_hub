@@ -1,3 +1,6 @@
+# Demo
+
+Check out the project demo on YouTube: [https://youtu.be/ii6y67TpA-Q?si=PDBg96C7ZtEyU2vB](https://youtu.be/ii6y67TpA-Q?si=PDBg96C7ZtEyU2vB)
 # GameHub
 
 ![Next.js](https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=next.js&logoColor=white)
